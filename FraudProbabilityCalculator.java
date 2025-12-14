@@ -1,21 +1,27 @@
+import java.util.List;
+
 public class FraudProbabilityCalculator {
 
-    public static int calculateProbability(int riskScore) {
+    public static int calculateRiskScore(
+            boolean duplicatePAN,
+            boolean ipAbuse,
+            List<String> ruleViolations
+    ) {
+        int score = 0;
 
-        if (riskScore > 100) {
-            return 100;
-        }
-        return riskScore;
+        if (duplicatePAN) score += 35;
+        if (ipAbuse) score += 25;
+        if (!ruleViolations.isEmpty()) score += 40;
+
+        return Math.min(score, 100);
     }
 
-    public static String getRiskLevel(int probability) {
-
-        if (probability >= 71) {
-            return "HIGH";
-        } else if (probability >= 31) {
-            return "MEDIUM";
-        } else {
-            return "LOW";
-        }
+    public static double fraudProbability(int riskScore) {
+        return Math.min(riskScore * 0.9, 95);
     }
-}
+
+    public static String riskLevel(int score) {
+        if (score >= 70) return "HIGH";
+        if (score >= 40) return "MEDIUM";
+        return "LOW";
+    }
