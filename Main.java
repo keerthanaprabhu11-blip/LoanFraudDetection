@@ -1,4 +1,4 @@
-import java.util.HashMap;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -6,71 +6,63 @@ public class Main {
     public static void main(String[] args) {
 
         Scanner sc = new Scanner(System.in);
-        HashMap<String, Object> applicant = new HashMap<>();
 
-        System.out.println("===== Loan Application Fraud Detection System =====");
+        System.out.println("===== Loan Application System =====");
 
-        // ---------- Identity & Network Inputs ----------
-        System.out.print("Enter PAN number: ");
-        String pan = sc.next();
+        System.out.print("Applicant Name: ");
+        String name = sc.nextLine();
 
-        System.out.print("Enter IP address: ");
-        String ip = sc.next();
+        System.out.print("PAN Number: ");
+        String pan = sc.nextLine();
 
-        // ---------- Business Inputs ----------
-        System.out.print("Enter annual income: ");
-        applicant.put("income", sc.nextDouble());
+        System.out.print("IP Address: ");
+        String ip = sc.nextLine();
 
-        System.out.print("Enter loan amount requested: ");
-        applicant.put("loanAmount", sc.nextDouble());
+        System.out.print("Monthly Income: ");
+        double monthlyIncome = sc.nextDouble();
 
-        sc.nextLine(); // clear buffer
+        System.out.print("Yearly Income: ");
+        double yearlyIncome = sc.nextDouble();
 
-        System.out.print("Enter employment status (Employed/Unemployed): ");
-        applicant.put("employmentStatus", sc.nextLine());
+        System.out.print("Loan Amount: ");
+        double loanAmount = sc.nextDouble();
+        System.out.print("Employment Duration (years): ");
+        int employmentYears = sc.nextInt();
 
-        System.out.print("Enter credit score: ");
-        applicant.put("creditScore", sc.nextInt());
+        // Internal fraud detection (hidden from user)
+        boolean duplicatePAN = IdentityIPChecker.detectDuplicatePAN(pan);
+        boolean ipAbuse = IdentityIPChecker.detectIPAbuse(ip);
 
-        System.out.print("Is salary document verified? (true/false): ");
-        applicant.put("salaryVerified", sc.nextBoolean());
+        List<String> violations = BusinessRuleEvaluator.evaluate(
+                monthlyIncome, yearlyIncome, loanAmount, employmentYears
+        );
 
-        System.out.print("Enter number of active loans: ");
-        applicant.put("activeLoans", sc.nextInt());
+        int riskScore = FraudProbabilityCalculator.calculateRiskScore(
+                duplicatePAN, ipAbuse, violations
+        );
 
-        // ---------- Evaluation ----------
-        System.out.println("\n--- Running Fraud Detection Checks ---");
+        double probability = FraudProbabilityCalculator.fraudProbability(riskScore);
+        String level = FraudProbabilityCalculator.riskLevel(riskScore);
+        double impact = FraudProbabilityCalculator.financialImpact(loanAmount, riskScore);
 
-        int businessRisk =
-                BusinessRuleEvaluator.evaluateRules(applicant);
+        System.out.println("\n====== FRAUD ANALYSIS REPORT ======");
+        System.out.println("Applicant: " + name);
+        System.out.println("Risk Score: " + riskScore + "/100");
+        System.out.println("Fraud Probability: " + probability + "%");
+        System.out.println("Risk Level: " + level);
+        System.out.println("Estimated Financial Impact: ₹" + impact);
 
-        int identityIpRisk =
-                IdentityIPChecker.checkIdentityAndIP(pan, ip);
-
-        int totalRiskScore = businessRisk + identityIpRisk;
-
-        int fraudProbability =
-                FraudProbabilityCalculator.calculateProbability(totalRiskScore);
-
-        String riskLevel =
-                FraudProbabilityCalculator.getRiskLevel(fraudProbability);
-
-        // ---------- Final Output ----------
-        System.out.println("\n--------------------------------------");
-        System.out.println("Total Risk Score      : " + totalRiskScore);
-        System.out.println("Fraud Probability     : " + fraudProbability + "%");
-        System.out.println("Overall Risk Level    : " + riskLevel);
-
-        if (riskLevel.equals("HIGH")) {
-            System.out.println("❌ APPLICATION FLAGGED AS FRAUD");
-        } else if (riskLevel.equals("MEDIUM")) {
-            System.out.println("⚠ APPLICATION SENT FOR MANUAL REVIEW");
+        if (!violations.isEmpty()) {
+            System.out.println("\nTriggered Risk Indicators:");
+             for (String v : violations) {
+                System.out.println("- " + v);
+            }
         } else {
-            System.out.println("✅ APPLICATION APPROVED");
+            System.out.println("\nNo risk indicators detected.");
         }
 
-        System.out.println("--------------------------------------");
-
+        System.out.println("=================================");
         sc.close();
     }
 }
+
