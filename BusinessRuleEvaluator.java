@@ -1,48 +1,28 @@
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BusinessRuleEvaluator {
 
-    public static int evaluateRules(HashMap<String, Object> applicant) {
+    public static List<String> evaluate(
+            double monthlyIncome,
+            double yearlyIncome,
+            double loanAmount,
+            int employmentYears
+    ) {
+        List<String> violations = new ArrayList<>();
 
-        int riskScore = 0;
-
-        double income = (double) applicant.get("income");
-        double loanAmount = (double) applicant.get("loanAmount");
-        String employment = (String) applicant.get("employmentStatus");
-        int creditScore = (int) applicant.get("creditScore");
-        boolean salaryVerified = (boolean) applicant.get("salaryVerified");
-        int activeLoans = (int) applicant.get("activeLoans");
-
-        // Income vs Loan Ratio
-        if (loanAmount > income * 0.8) {
-            System.out.println("⚠ High loan-to-income ratio");
-            riskScore += 30;
+        if (Math.abs((monthlyIncome * 12) - yearlyIncome) > 0.2 * yearlyIncome) {
+            violations.add("Income inconsistency detected");
         }
 
-        // Employment Consistency
-        if (employment.equalsIgnoreCase("Unemployed")) {
-            System.out.println("⚠ Unemployed applicant");
-            riskScore += 25;
+        if (loanAmount > monthlyIncome * 20) {
+            violations.add("Loan amount exceeds safe income ratio");
         }
 
-        // Suspicious Income Pattern
-        if (income < 100000 || income > 5000000) {
-            System.out.println("⚠ Suspicious income pattern");
-            riskScore += 15;
+        if (employmentYears < 1) {
+            violations.add("Employment stability is low");
         }
 
-        // Salary Document Verification
-        if (!salaryVerified) {
-            System.out.println("⚠ Salary document not verified");
-            riskScore += 20;
-        }
-
-        // High-risk Financial Behaviour
-        if (creditScore < 600 || activeLoans > 3) {
-            System.out.println("⚠ High financial risk behavior");
-            riskScore += 25;
-        }
-
-        return riskScore;
+        return violations;
     }
 }
