@@ -2,26 +2,16 @@ import java.util.HashMap;
 
 public class IdentityIPChecker {
 
-    private static HashMap<String, Integer> panUsage = new HashMap<>();
-    private static HashMap<String, Integer> ipUsage = new HashMap<>();
+    private static HashMap<String, Integer> panStore = new HashMap<>();
+    private static HashMap<String, Integer> ipStore = new HashMap<>();
 
-    public static int checkIdentityAndIP(String pan, String ip) {
+    public static boolean detectDuplicatePAN(String pan) {
+        panStore.put(pan, panStore.getOrDefault(pan, 0) + 1);
+        return panStore.get(pan) > 1;
+    }
 
-        int risk = 0;
-
-        panUsage.put(pan, panUsage.getOrDefault(pan, 0) + 1);
-        ipUsage.put(ip, ipUsage.getOrDefault(ip, 0) + 1);
-
-        if (panUsage.get(pan) > 2) {
-            System.out.println("⚠ Duplicate PAN usage detected");
-            risk += 30;
-        }
-
-        if (ipUsage.get(ip) > 3) {
-            System.out.println("⚠ Multiple applications from same IP");
-            risk += 20;
-        }
-
-        return risk;
+    public static boolean detectIPAbuse(String ip) {
+        ipStore.put(ip, ipStore.getOrDefault(ip, 0) + 1);
+        return ipStore.get(ip) > 3;
     }
 }
